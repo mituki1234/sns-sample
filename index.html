@@ -1,13 +1,86 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>sample-sns</title>
+        <!-- React and ReactDOM -->
+        <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
+        <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+        <!-- Babel -->
+        <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
     </head>
     <body>
         <h1>SNS</h1>
         <div class="container">
-            <div class="postlists">
+            <div id="root">
             </div>
         </div>
     </body>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+          apiKey: "AIzaSyCqDXonVjobp6GpZ7bss5W8xLhYLW_jEiQ",
+          authDomain: "gamenect-dbefe.firebaseapp.com",
+          databaseURL: "https://gamenect-dbefe-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "gamenect-dbefe",
+          storageBucket: "gamenect-dbefe.appspot.com",
+          messagingSenderId: "645562015255",
+          appId: "1:645562015255:web:ef0be9254983d502630652",
+          measurementId: "G-3JL8FFH3H6"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        const App = () => {
+            const [messages, setMessages] = React.useState([]);
+            const [newMessage, setNewMessage] = React.useState('');
+
+            React.useEffect(() => {
+                const fetchMessages = async () => {
+                    const querySnapshot = await db.collection('messages').get();
+                    const messagesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setMessages(messagesList);
+                };
+                fetchMessages();
+            }, []);
+
+            const addMessage = async () => {
+                if (newMessage.trim() === '') return;
+                await db.collection('messages').add({ text: newMessage });
+                setNewMessage('');
+                const querySnapshot = await db.collection('messages').get();
+                const messagesList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setMessages(messagesList);
+            };
+
+            return (
+                <div>
+                    <h1>Messages</h1>
+                    <ul>
+                        {messages.map((message) => (
+                            <li key={message.id}>{message.text}</li>
+                        ))}
+                    </ul>
+                    <input 
+                        type="text" 
+                        value={newMessage} 
+                        onChange={(e) => setNewMessage(e.target.value)} 
+                    />
+                    <button onClick={addMessage}>Send</button>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </html> 
