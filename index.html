@@ -40,6 +40,7 @@
 
             // データを取得して表示する
             const messagesRef = ref(database, 'messages');
+            console.log(messagesRef)
             onValue(messagesRef, (snapshot) => {
                 dataList.innerHTML = ''; // 初期化
                 snapshot.forEach((childSnapshot) => {
