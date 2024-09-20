@@ -4,18 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firebase Demo</title>
-    <!-- Firebase App (必要なものだけ) -->
-    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js"></script>
-</head>
-<body>
-    <h1>Firebase Realtime Database Example</h1>
-    <input type="text" id="dataInput" placeholder="データを入力">
-    <button id="submitBtn">送信</button>
-    <ul id="dataList"></ul>
-
-    <script>
+    <!-- Firebase SDK -->
+    <script type="module">
         // Firebaseの設定
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
         const firebaseConfig = {
             apiKey: "YOUR_API_KEY",
             authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -27,29 +21,40 @@
         };
 
         // Firebaseの初期化
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         // データを送信する
-        document.getElementById("submitBtn").onclick = function() {
-            const data = document.getElementById("dataInput").value;
-            database.ref('messages').push().set({
-                message: data
-            });
-            document.getElementById("dataInput").value = ''; // 入力欄をクリア
-        };
-
-        // データを取得して表示する
-        database.ref('messages').on('value', (snapshot) => {
+        window.addEventListener('DOMContentLoaded', () => {
+            const dataInput = document.getElementById("dataInput");
+            const submitBtn = document.getElementById("submitBtn");
             const dataList = document.getElementById("dataList");
-            dataList.innerHTML = ''; // 初期化
-            snapshot.forEach((childSnapshot) => {
-                const childData = childSnapshot.val();
-                const li = document.createElement("li");
-                li.textContent = childData.message;
-                dataList.appendChild(li);
+
+            submitBtn.onclick = () => {
+                const data = dataInput.value;
+                const messagesRef = ref(database, 'messages');
+                push(messagesRef).set({ message: data });
+                dataInput.value = ''; // 入力欄をクリア
+            };
+
+            // データを取得して表示する
+            const messagesRef = ref(database, 'messages');
+            onValue(messagesRef, (snapshot) => {
+                dataList.innerHTML = ''; // 初期化
+                snapshot.forEach((childSnapshot) => {
+                    const childData = childSnapshot.val();
+                    const li = document.createElement("li");
+                    li.textContent = childData.message;
+                    dataList.appendChild(li);
+                });
             });
         });
     </script>
+</head>
+<body>
+    <h1>Firebase Realtime Database Example</h1>
+    <input type="text" id="dataInput" placeholder="データを入力">
+    <button id="submitBtn">送信</button>
+    <ul id="dataList"></ul>
 </body>
 </html>
