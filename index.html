@@ -33,7 +33,8 @@
             submitBtn.onclick = () => {
                 const data = dataInput.value;
                 const messagesRef = ref(database, 'messages');
-                push(messagesRef).set({ message: data });
+                const newMessageRef = push(messagesRef); // 新しいメッセージの参照を取得
+                set(newMessageRef, { message: data }); // その参照にデータをセット
                 dataInput.value = ''; // 入力欄をクリア
             };
 
